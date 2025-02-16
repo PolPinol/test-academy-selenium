@@ -44,3 +44,10 @@ To execute the test suite, run:
 ```
 
 This will compile the project, run the tests, and report the results.
+
+## Analyze report
+
+In order to see the results of the run, you can open the following route:
+```bash
+target/site/serenity/index.html
+```
