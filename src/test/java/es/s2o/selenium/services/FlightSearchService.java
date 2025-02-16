@@ -35,7 +35,8 @@ public class FlightSearchService {
         vuelingSearchPage.selectOneWayTrip();
         vuelingSearchPage.selectDateInCalendar(search.departureDate());
         vuelingSearchPage.clickSearch();
-        switchToNewWindow();
+
+        vuelingSearchPage.switchToNewWindow();
     }
 
     @Step("Verify flight search results are present")
@@ -43,22 +44,5 @@ public class FlightSearchService {
         boolean results = vuelingSearchPage.hasResults();
         LOGGER.info("Flight search results found: {}", results);
         return results;
-    }
-
-    private void switchToNewWindow() {
-        String currentWindow = vuelingSearchPage.getDriver().getWindowHandle();
-        LOGGER.debug("Current window handle: {}", currentWindow);
-        boolean switched = false;
-        for (String handle : vuelingSearchPage.getDriver().getWindowHandles()) {
-            if (!handle.equals(currentWindow)) {
-                LOGGER.info("Switching to new window with handle: {}", handle);
-                vuelingSearchPage.getDriver().switchTo().window(handle);
-                switched = true;
-                break;
-            }
-        }
-        if (!switched) {
-            LOGGER.warn("No additional window found to switch to.");
-        }
     }
 }

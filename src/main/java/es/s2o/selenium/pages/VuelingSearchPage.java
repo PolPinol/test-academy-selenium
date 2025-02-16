@@ -6,7 +6,6 @@ import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.support.ui.FluentWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.Month;
@@ -90,7 +89,6 @@ public class VuelingSearchPage extends PageObjectBase {
                 return false;
             }
         }, 10);
-
         if (!success) {
             throw new RuntimeException("Unable to set origin within timeout.");
         }
@@ -113,7 +111,6 @@ public class VuelingSearchPage extends PageObjectBase {
                 return false;
             }
         }, 10);
-
         if (!success) {
             throw new RuntimeException("Unable to set destination within timeout.");
         }
@@ -133,7 +130,6 @@ public class VuelingSearchPage extends PageObjectBase {
                 return false;
             }
         }, 10);
-
         if (!success) {
             throw new RuntimeException("Unable to select one-way trip within timeout.");
         }
@@ -148,19 +144,13 @@ public class VuelingSearchPage extends PageObjectBase {
                 String monthText = $(CALENDAR_MONTH_HEADER).waitUntilVisible().getText().toUpperCase().trim();
                 String yearText = $(CALENDAR_YEAR_HEADER).waitUntilVisible().getText().trim();
                 LOGGER.debug("Calendar shows: {} {}", monthText, yearText);
-
                 Month monthShown = SPANISH_TO_MONTH.get(monthText);
                 int yearShown = Integer.parseInt(yearText);
-
                 if (monthShown.getValue() == desiredDate.getMonthValue() && yearShown == desiredDate.getYear()) {
                     int zeroBasedMonth = desiredDate.getMonthValue() - 1;
                     String dayXPath = String.format(
                             "//td[@data-year='%d' and @data-month='%d']//a[normalize-space(text())='%d']",
-                            desiredDate.getYear(),
-                            zeroBasedMonth,
-                            desiredDate.getDayOfMonth()
-                    );
-
+                            desiredDate.getYear(), zeroBasedMonth, desiredDate.getDayOfMonth());
                     WebElementFacade dayElement = $(By.xpath(dayXPath)).waitUntilClickable();
                     dayElement.click();
                     resetDocument();
@@ -182,7 +172,6 @@ public class VuelingSearchPage extends PageObjectBase {
                 return false;
             }
         }, 15);
-
         if (!dateSelected) {
             throw new RuntimeException("Unable to select the desired date " + desiredDate);
         }
@@ -202,23 +191,20 @@ public class VuelingSearchPage extends PageObjectBase {
                 return false;
             }
         }, 10);
-
         if (!clicked) {
             throw new RuntimeException("Unable to click the search button within 10 seconds.");
         }
     }
 
     /**
-     * Checks if there are any flight results, waiting up to 15 seconds to handle slow loading.
+     * Checks if there are any flight results, waiting up to 15 seconds.
      */
     public boolean hasResults() {
         return waitForCondition(() -> {
             List<WebElementFacade> oldResults = findAll(FLIGHT_CARD_SELECTOR);
             List<WebElementFacade> newResults = findAll(NEW_FLIGHT_CARD_SELECTOR);
-
             LOGGER.debug("Found {} elements using old locator.", oldResults.size());
             LOGGER.debug("Found {} elements using new locator.", newResults.size());
-
             return !oldResults.isEmpty() || !newResults.isEmpty();
         }, 15);
     }
@@ -231,7 +217,6 @@ public class VuelingSearchPage extends PageObjectBase {
             WebElementFacade acceptButton = $(ACCEPT_COOKIES_BUTTON)
                     .withTimeoutOf(Duration.ofSeconds(10))
                     .waitUntilVisible();
-
             if (acceptButton.isCurrentlyVisible()) {
                 LOGGER.debug("Accepting cookies.");
                 acceptButton.click();
@@ -239,6 +224,26 @@ public class VuelingSearchPage extends PageObjectBase {
             }
         } catch (Exception e) {
             LOGGER.info("Cookies accept button not found, continuing without accepting cookies.");
+        }
+    }
+
+    /**
+     * Switches to a new browser window if one is available.
+     */
+    public void switchToNewWindow() {
+        String currentWindow = getDriver().getWindowHandle();
+        LOGGER.debug("Current window handle: {}", currentWindow);
+        boolean switched = false;
+        for (String handle : getDriver().getWindowHandles()) {
+            if (!handle.equals(currentWindow)) {
+                LOGGER.info("Switching to new window with handle: {}", handle);
+                getDriver().switchTo().window(handle);
+                switched = true;
+                break;
+            }
+        }
+        if (!switched) {
+            LOGGER.warn("No additional window found to switch to.");
         }
     }
 }
